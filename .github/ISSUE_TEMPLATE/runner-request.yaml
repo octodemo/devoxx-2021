@@ -1,0 +1,36 @@
+name: Runner request
+description: 'Request the creation of a new runner'
+title: 'New runner request: '
+labels: runner
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue allows to request a new runner
+  - type: input
+    id: name
+    attributes:
+      label: 'Name:'
+      description: What is the runner's name
+      placeholder: my-awesome-runner
+    validations:
+      required: true    
+  - type: dropdown
+    id: os        
+    validations:
+      required: true
+    attributes:
+      label: 'Operating system:'
+      description: Which OS does this runner runs on
+      options:
+        - Linux
+        - Windows
+  - type: dropdown
+    id: labels
+    attributes:
+      label: 'Labels:'
+      description: Which labels should this runner have
+      multiple: true
+      options:
+        - java
+        - node
