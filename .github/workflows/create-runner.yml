@@ -39,7 +39,7 @@ jobs:
       - name: GitHub Script
         uses: actions/github-script@v4.1.1
         with:
-          github-token: steps.get_token.outputs.token          
+          github-token: ${{ steps.get_token.outputs.token }}
           script: |
             github.actions.createRegistrationTokenForRepo({
               owner: 'octodemo',
