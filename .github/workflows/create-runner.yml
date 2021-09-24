@@ -33,7 +33,7 @@ jobs:
         uses: actions/github-script@v4.1.1
         with:
           script: |
-            github.rest.actions.createRegistrationTokenForRepo({
+            github.actions.createRegistrationTokenForRepo({
               owner: 'octodemo',
               repo: 'devoxx-2021'
             }).then(resp => {
