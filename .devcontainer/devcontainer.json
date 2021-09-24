@@ -1,6 +1,8 @@
 {
 	"name": "My NuxtJS Codespace",
 	"workspaceFolder": "/workspace",
+	"image": "node:14", 
+	"forwardPorts": [3000],
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
