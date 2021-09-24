@@ -20,4 +20,4 @@ jobs:
         uses: actions/checkout@master
 
       - name: Node CI
-      uses: octodemo/devoxx-2021-node@master
+        uses: octodemo/devoxx-2021-node@master
