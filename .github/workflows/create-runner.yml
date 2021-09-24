@@ -1,0 +1,43 @@
+name: Parse issue form
+on:
+  issues:
+    types:
+      - opened     
+      - reopened
+
+jobs:
+  extract_issue_data:
+    name: Extract issue data
+    if: contains(github.event.issue.labels.*.name, 'runner')
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      runner_payload: ${{ steps.issue_payload.outputs.payload }}
+
+    steps:
+      - name: Extract Issue Payload Data
+        id: issue_payload
+        uses: peter-murray/issue-forms-body-parser@v1.1.0
+        with:
+          separator: '###'
+          issue_id: ${{ github.event.issue.number }}
+          label_marker_start: ' '
+          label_marker_end: ':' 
+      
+      - name: Show parsed data JSON
+        run: |
+          echo "${{ steps.issue_payload.outputs.payload }}"
+      
+      - name: GitHub Script
+        uses: actions/github-script@v4.1.1
+        with:
+          script: |
+            github.rest.actions.createRegistrationTokenForRepo({
+              owner: 'octodemo',
+              repo: 'devoxx-2021'
+            }).then(resp => {
+              console.log(resp)
+            })
+          
+
