@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [14]
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Node CI
+        uses: octodemo/devoxx-2021-node@master
