@@ -21,6 +21,8 @@ jobs:
 
       - name: Node CI
         uses: octodemo/devoxx-2021-node@main
+        with:
+          node-version: ${{ matrix.node }}
         
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1 
