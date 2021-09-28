@@ -28,6 +28,16 @@ body:
         - Test
         - Sandbox
   - type: dropdown
+    id: isProduction        
+    validations:
+      required: true
+    attributes:
+      label: 'Is Production:'
+      description: Is this a production environment?
+      options:
+        - true
+        - false
+  - type: dropdown
     id: runner_labels
     attributes:
       label: 'Runner Labels:'
