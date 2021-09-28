@@ -30,6 +30,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const isProduction = process.env.isProduction.toLowerCase() === 'true'
             const deploymentPayload = {
                   container_registry: process.env.container_registry_url,
                   container_image: process.env.container_image,
@@ -46,7 +47,7 @@ jobs:
               payload: JSON.stringify(deploymentPayload),
               environment: process.env.environment,
               description: `Deploy Pull Request to ${process.env.environment}`,
-              transient_environment: !process.env.isProduction,
-              production_environment: process.env.isProduction,
+              transient_environment: !isProduction,
+              production_environment: isProduction,
               mediaType: { previews: ["flash-preview", "ant-man"] }
             });
