@@ -35,8 +35,8 @@ body:
       label: 'Is Production:'
       description: Is this a production environment?
       options:
-        - true
-        - false
+        - 'True'
+        - 'False'
   - type: dropdown
     id: runner_labels
     attributes:
