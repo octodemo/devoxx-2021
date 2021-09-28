@@ -1,14 +1,13 @@
-name: Deploy Web App on Azure
+name: Deploy to production
 
 on:
   deployment
-
-if: context.payload.deploymentenvironment === 'production'
 
 jobs:
   deploy:
     name: Deploy to Environment
     runs-on: ubuntu-latest
+    if: context.payload.deploymentenvironment === 'production'
 
     steps:
       - name: Extract Deployment Details and Report Deployment in Progress
