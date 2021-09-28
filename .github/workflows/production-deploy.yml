@@ -93,13 +93,13 @@ jobs:
       - name: Deploy the WebApp Container
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ steps.deployment_data.outputs.webapp_name }}
-          images: ${{ steps.deployment_data.outputs.container_image }}
+          app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
+          images: ${{ needs.prepareToDeploy.outputs.container_image }}
 
       - name: Load Deployment
         timeout-minutes: 2
         continue-on-error: true
-        run: curl https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
+        run: curl https://${{ needs.prepareToDeploy.outputs.webapp_name }}.azurewebsites.net
 
       - name: Report Success
         uses: octokit/request-action@v1.x
@@ -109,7 +109,7 @@ jobs:
           environment: ${{ github.event.deployment.environment }}
           description: "Deployed in ${{ github.event.deployment.environment }}"
           state: "success"
-          environment_url: "https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net"
+          environment_url: "https://${{ needs.prepareToDeploy.outputs.webapp_name }}.azurewebsites.net"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
