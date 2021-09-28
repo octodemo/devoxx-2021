@@ -10,7 +10,7 @@ on:
       isProduction:
         description: 'Is this a prodution environment?'
         required: true
-        default: true
+        default: 'true'
 
         
 jobs:
@@ -25,8 +25,8 @@ jobs:
         env:
           container_registry_url: gcr.io
           container_image: octodemo/devoxx-2021:master
-          environment: ${{ inputs.environment }}
-          isProduction: ${{ inputs.isProduction }}
+          environment: ${{ github.event.inputs.environment }}
+          isProduction: ${{ github.event.inputs.isProduction }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
