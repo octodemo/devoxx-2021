@@ -1,0 +1,52 @@
+name: Manu Deploy Request
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: true
+        default: 'Production'
+      isProduction:
+        description: 'Is this a prodution environment?'
+        required: true
+        default: true
+
+        
+jobs:
+  deploy:
+    name: Create Deployment
+    runs-on: ubuntu-latest
+
+    steps:        
+      - name: Create Deployment
+        id: create_deployment
+        uses: actions/github-script@v3
+        env:
+          container_registry_url: gcr.io
+          container_image: octodemo/devoxx-2021:master
+          environment: ${{ inputs.environment }}
+          isProduction: ${{ inputs.isProduction }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const deploymentPayload = {
+                  container_registry: process.env.container_registry_url,
+                  container_image: process.env.container_image,
+                  environment: process.env.environment,
+                  ref: context.ref,
+                }
+              ;
+            await github.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              auto_merge: false,
+              required_contexts: [],
+              payload: JSON.stringify(deploymentPayload),
+              environment: environment,
+              description: `Deploy Pull Request to ${process.env.environment}`,
+              transient_environment: !process.env.isProduction,
+              production_environment: process.env.isProduction,
+              mediaType: { previews: ["flash-preview", "ant-man"] }
+            });
