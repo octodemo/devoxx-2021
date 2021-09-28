@@ -44,7 +44,7 @@ jobs:
               auto_merge: false,
               required_contexts: [],
               payload: JSON.stringify(deploymentPayload),
-              environment: environment,
+              environment: process.env.environment,
               description: `Deploy Pull Request to ${process.env.environment}`,
               transient_environment: !process.env.isProduction,
               production_environment: process.env.isProduction,
