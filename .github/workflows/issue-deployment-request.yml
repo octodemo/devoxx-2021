@@ -42,8 +42,8 @@ jobs:
         env:
           container_registry_url: gcr.io
           container_image: octodemo/devoxx-2021:master
-          environment: ${{ github.event.inputs.environment }}
-          isProduction: ${{ github.event.inputs.isProduction }}
+          environment: ${{ steps.issue_payload.outputs.payload.environment }}
+          isProduction: ${{ steps.issue_payload.outputs.payload.isProduction }}
         with:
           github-token: ${{ steps.temp_token.outputs.token }}
           script: |
