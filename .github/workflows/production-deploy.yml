@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.deployment.environment == 'Production'
     environment: 
-      name: production
+      name: Production
       url: https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
     outputs:
       container_registry_url: ${{ steps.deployment_data.outputs.container_registry_url }}
