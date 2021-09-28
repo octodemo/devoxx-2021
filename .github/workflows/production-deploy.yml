@@ -7,9 +7,9 @@ jobs:
   deploy:
     name: Deploy to Environment
     runs-on: ubuntu-latest
-
+    if: github.event.deployment.environment == 'Production'
+    
     steps:
-      - run: echo ${{ github.event.deployment.environment }} 
       - name: Extract Deployment Details and Report Deployment in Progress
         id: deployment_data
         uses: actions/github-script@v3
