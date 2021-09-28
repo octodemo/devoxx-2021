@@ -1,0 +1,39 @@
+name: Deploy
+description: 'Request a deployment'
+title: 'New deployment request: '
+labels: deploy
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue allows to request a deployment
+  - type: input
+    id: environment
+    attributes:
+      label: 'Environment:'
+      description: What is the runner's name
+      placeholder: my-awesome-runner
+    validations:
+      required: true    
+  - type: dropdown
+    id: environment        
+    validations:
+      required: true
+    attributes:
+      label: 'Environment:'
+      description: Which environment should we target
+      options:
+        - Production
+        - Test
+        - Sandbox
+  - type: dropdown
+    id: runner_labels
+    attributes:
+      label: 'Runner Labels:'
+      description: Which labels should this runner have
+      multiple: true
+      options:
+        - self-hosted
+        - node
+        - java
+        - docker
