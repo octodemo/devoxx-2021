@@ -94,25 +94,25 @@ jobs:
       - name: Set Web App ACR authentication
         uses: Azure/appservice-settings@v1
         with:
-          app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
-          app-settings-json: |
-            [
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                  "value": "${{ steps.temp_token.outputs.token }}",
-                  "slotSetting": false
-              },
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_URL",
-                  "value": "${{ needs.prepareToDeploy.outputs.container_registry_url }}",
-                  "slotSetting": false
-              },
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                  "value": "${{ secrets.REGISTRY_USERNAME  }}",
-                  "slotSetting": false
-              }
-            ]
+        app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
+        app-settings-json: |
+          [
+            {
+                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                "value": "${{ steps.temp_token.outputs.token }}",
+                "slotSetting": false
+            },
+            {
+                "name": "DOCKER_REGISTRY_SERVER_URL",
+                "value": "${{ needs.prepareToDeploy.outputs.container_registry_url }}",
+                "slotSetting": false
+            },
+            {
+                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                "value": "<token>",
+                "slotSetting": false
+            }
+          ]
 
       - name: Deploy the WebApp Container
         uses: azure/webapps-deploy@v2
