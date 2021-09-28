@@ -1,0 +1,52 @@
+name: Deploy Web App on Azure
+
+on:
+  deployment
+
+if: context.payload.deploymentenvironment === 'production'
+
+jobs:
+  deploy:
+    name: Deploy to Environment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Deployment Details and Report Deployment in Progress
+        id: deployment_data
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const run = process.env.GITHUB_RUN_ID
+              , log_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run}`
+              ;
+            //TODO remove
+            console.log(JSON.stringify(context, null, 2));
+            const deployment = context.payload.deployment
+              , environment = deployment.environment
+              , deploymentPayload = JSON.parse(deployment.payload)
+              , containerRegistryUrl = `${deploymentPayload.container_registry}`
+              , containerImage = `${deploymentPayload.container_image}`
+              , deploymentRef = deploymentPayload.ref
+              ;
+            let webAppName = `${context.repo.repo}-${environment}`
+            //if (environment !== 'prod') {
+            //  webAppName += `-${deployment.id}`
+            //}
+            core.setOutput('container_registry_url', containerRegistryUrl);
+            core.setOutput('container_image', containerImage);
+            core.setOutput('webapp_name', webAppName);
+            core.setOutput('deployment_github_ref', deploymentRef);
+            core.setOutput('app_type', environment == 'prod' ? 'prod' : 'review');
+            github.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              mediaType: {
+                previews: ["flash-preview", "ant-man"]
+              },
+              deployment_id: context.payload.deployment.id,
+              state: 'in_progress',
+              description: 'Deployment from GitHub Actions started',
+              target_url: log_url,
+              log_url: log_url
+            })
