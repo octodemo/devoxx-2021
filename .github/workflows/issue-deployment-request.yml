@@ -40,7 +40,7 @@ jobs:
         id: create_deployment
         uses: actions/github-script@v3
         env:
-          container_registry_url: gcr.io
+          container_registry_url: ghcr.io
           container_image: octodemo/devoxx-2021:master
           environment: ${{ steps.issue_payload.outputs.payload.environment }}
           isProduction: ${{ steps.issue_payload.outputs.payload.isProduction }}
