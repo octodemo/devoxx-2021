@@ -15,7 +15,7 @@ jobs:
       name: Production
       url: https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
     outputs:
-      container_registry_url: https://${{ steps.deployment_data.outputs.container_registry_url }}
+      container_registry_url: ${{ steps.deployment_data.outputs.container_registry_url }}
       container_image: ${{ steps.deployment_data.outputs.container_image }}
       webapp_name: ${{ steps.deployment_data.outputs.webapp_name }}
       deployment_github_ref: ${{ steps.deployment_data.outputs.deployment_github_ref }}
@@ -91,34 +91,11 @@ jobs:
           az webapp config container set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --docker-registry-server-password $DOCKER_PASSWORD --docker-registry-server-user $DOCKER_USERNAME --docker-registry-server-url $CONTAINER_REGISTRY_URL
           az webapp update -g $RESOURCE_GROUP -n $WEBAPP_NAME --set tags.ref=$APP_GITHUB_REF tags.type=$APP_TYPE
       
-      - name: Set Web App ACR authentication
-        uses: Azure/appservice-settings@v1
-        with:
-          app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
-          app-settings-json: |
-            [
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                  "value": "${{ steps.temp_token.outputs.token }}",
-                  "slotSetting": false
-              },
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_URL",
-                  "value": "${{ needs.prepareToDeploy.outputs.container_registry_url }}",
-                  "slotSetting": false
-              },
-              {
-                  "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                  "value": "<token>",
-                  "slotSetting": false
-              }
-            ]
-
       - name: Deploy the WebApp Container
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
-          images: gcr.io/${{ needs.prepareToDeploy.outputs.container_image }}
+          images: ${{ needs.prepareToDeploy.outputs.container_registry_url }}/${{ needs.prepareToDeploy.outputs.container_image }}
 
       - name: Load Deployment
         timeout-minutes: 2

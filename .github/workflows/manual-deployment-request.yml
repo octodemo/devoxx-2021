@@ -32,7 +32,7 @@ jobs:
         id: create_deployment
         uses: actions/github-script@v3
         env:
-          container_registry_url: gcr.io
+          container_registry_url: ghcr.io
           container_image: octodemo/devoxx-2021:master
           environment: ${{ github.event.inputs.environment }}
           isProduction: ${{ github.event.inputs.isProduction }}
