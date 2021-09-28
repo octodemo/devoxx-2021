@@ -90,6 +90,30 @@ jobs:
           az webapp create --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --name $WEBAPP_NAME --deployment-container-image-name $CONTAINER_IMAGE
           az webapp config container set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --docker-registry-server-password $DOCKER_PASSWORD --docker-registry-server-user $DOCKER_USERNAME --docker-registry-server-url $CONTAINER_REGISTRY_URL
           az webapp update -g $RESOURCE_GROUP -n $WEBAPP_NAME --set tags.ref=$APP_GITHUB_REF tags.type=$APP_TYPE
+      
+      - name: Set Web App ACR authentication
+        uses: Azure/appservice-settings@v1
+        with:
+        app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
+        app-settings-json: |
+          [
+            {
+                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                "value": "${{ steps.temp_token.outputs.token }}",
+                "slotSetting": false
+            },
+            {
+                "name": "DOCKER_REGISTRY_SERVER_URL",
+                "value": "${{ needs.prepareToDeploy.outputs.container_registry_url }}",
+                "slotSetting": false
+            },
+            {
+                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                "value": "${{ secrets.REGISTRY_USERNAME  }}",
+                "slotSetting": false
+            }
+          ]
+
       - name: Deploy the WebApp Container
         uses: azure/webapps-deploy@v2
         with:
