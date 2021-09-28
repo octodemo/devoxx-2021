@@ -1,0 +1,64 @@
+name: Parse issue form
+on:
+  issues:
+    types:
+      - opened     
+      - reopened
+
+jobs:
+  extract_issue_data:
+    name: Extract issue data
+    if: contains(github.event.issue.labels.*.name, 'deploy')
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      runner_payload: ${{ steps.issue_payload.outputs.payload }}
+
+    steps:
+      - name: Extract Issue Payload Data
+        id: issue_payload
+        uses: peter-murray/issue-forms-body-parser@v1.1.0
+        with:
+          separator: '###'
+          issue_id: ${{ github.event.issue.number }}
+          label_marker_start: ' '
+          label_marker_end: ':' 
+      
+      - name: Show parsed data JSON
+        run: |
+          echo "${{ steps.issue_payload.outputs.payload }}"
+          
+      - name: Create Deployment
+        id: create_deployment
+        uses: actions/github-script@v3
+        env:
+          container_registry_url: gcr.io
+          container_image: octodemo/devoxx-2021:master
+          environment: ${{ steps.issue_payload.outputs.payload.environment }}
+          isProduction: ${{ steps.issue_payload.outputs.payload.isProduction }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const isProduction = process.env.isProduction.toLowerCase() === 'true'
+            const deploymentPayload = {
+                  container_registry: process.env.container_registry_url,
+                  container_image: process.env.container_image,
+                  environment: process.env.environment,
+                  ref: context.ref,
+                }
+              ;
+            await github.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              auto_merge: false,
+              required_contexts: [],
+              payload: JSON.stringify(deploymentPayload),
+              environment: process.env.environment,
+              description: `Deploy Pull Request to ${process.env.environment}`,
+              transient_environment: !isProduction,
+              production_environment: isProduction,
+              mediaType: { previews: ["flash-preview", "ant-man"] }
+            });
+
