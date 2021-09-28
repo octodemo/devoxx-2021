@@ -2,15 +2,24 @@ name: Deploy to production
 
 on:
   deployment
-
+env:
+  AZURE_RESOURCE_GROUP_NAME: 'devoxx-2021'
+  AZURE_APP_PLAN_NAME: 'linux-fr' 
+  
 jobs:
-  deploy:
-    name: Deploy to Environment
+  prepareToDeploy:
+    name: Prepare to deploy
     runs-on: ubuntu-latest
     if: github.event.deployment.environment == 'Production'
     environment: 
       name: production
-      url: 'https://somewhere.com'
+      url: https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
+    outputs:
+      container_registry_url: ${{ steps.deployment_data.outputs.container_registry_url }}
+      container_image: ${{ steps.deployment_data.outputs.container_image }}
+      webapp_name: ${{ steps.deployment_data.outputs.webapp_name }}
+      deployment_github_ref: ${{ steps.deployment_data.outputs.deployment_github_ref }}
+      app_type: ${{ steps.deployment_data.outputs.app_type }}
     
     steps:
       - name: Extract Deployment Details and Report Deployment in Progress
@@ -48,3 +57,71 @@ jobs:
               target_url: log_url,
               log_url: log_url
             })
+  
+  deploy:
+    name: Deploy
+    needs: prepareToDeploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Get temporary token for creating deployment
+        id: temp_token
+        uses: peter-murray/workflow-application-token-action@v1.0.3
+        with:
+          application_id: ${{ secrets.DEPLOYMENT_TOKEN_APP_ID }}
+          application_private_key: ${{ secrets.DEPLOYMENT_TOKEN_APP_KEY }}
+
+      - name: Create Azure WebApp
+        env:
+          RESOURCE_GROUP: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+          APP_SERVICE_PLAN: ${{ env.AZURE_APP_PLAN_NAME }}
+          DOCKER_USERNAME: <token>
+          DOCKER_PASSWORD: ${{ steps.temp_token.outputs.token }}
+          CONTAINER_REGISTRY_URL: ${{ needs.prepareToDeploy.outputs.container_registry_url }}
+          CONTAINER_IMAGE: ${{ needs.prepareToDeploy.outputs.container_image }}
+          APP_GITHUB_REF: ${{ needs.prepareToDeploy.outputs.deployment_github_ref }}
+          APP_TYPE: ${{ needs.prepareToDeploy.outputs.app_type }}
+          WEBAPP_NAME: ${{ needs.prepareToDeploy.outputs.webapp_name }}
+        run: |
+          az webapp create --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --name $WEBAPP_NAME --deployment-container-image-name $CONTAINER_IMAGE
+          az webapp config container set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --docker-registry-server-password $DOCKER_PASSWORD --docker-registry-server-user $DOCKER_USERNAME --docker-registry-server-url $CONTAINER_REGISTRY_URL
+          az webapp update -g $RESOURCE_GROUP -n $WEBAPP_NAME --set tags.ref=$APP_GITHUB_REF tags.type=$APP_TYPE
+      - name: Deploy the WebApp Container
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ steps.deployment_data.outputs.webapp_name }}
+          images: ${{ steps.deployment_data.outputs.container_image }}
+
+      - name: Load Deployment
+        timeout-minutes: 2
+        continue-on-error: true
+        run: curl https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
+
+      - name: Report Success
+        uses: octokit/request-action@v1.x
+        with:
+          route: POST /repos/:owner/:repo/deployments/:deployment_id/statuses
+          deployment_id: ${{ github.event.deployment.id }}
+          environment: ${{ github.event.deployment.environment }}
+          description: "Deployed in ${{ github.event.deployment.environment }}"
+          state: "success"
+          environment_url: "https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report Failure
+        if: failure()
+        uses: octokit/request-action@v1.x
+        with:
+          route: POST /repos/:owner/:repo/deployments/:deployment_id/statuses
+          deployment_id: ${{ github.event.deployment.id }}
+          description: "Deploy failed for ${{ github.event.deployment.environment }}"
+          environment: ${{ github.event.deployment.environment }}
+          state: "failure"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
