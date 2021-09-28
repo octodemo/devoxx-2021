@@ -7,14 +7,6 @@ body:
     attributes:
       value: |
         This issue allows to request a deployment
-  - type: input
-    id: environment
-    attributes:
-      label: 'Environment:'
-      description: What is the runner's name
-      placeholder: my-awesome-runner
-    validations:
-      required: true    
   - type: dropdown
     id: environment        
     validations:
