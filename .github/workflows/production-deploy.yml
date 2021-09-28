@@ -15,7 +15,7 @@ jobs:
       name: Production
       url: https://${{ steps.deployment_data.outputs.webapp_name }}.azurewebsites.net
     outputs:
-      container_registry_url: ${{ steps.deployment_data.outputs.container_registry_url }}
+      container_registry_url: http://${{ steps.deployment_data.outputs.container_registry_url }}
       container_image: ${{ steps.deployment_data.outputs.container_image }}
       webapp_name: ${{ steps.deployment_data.outputs.webapp_name }}
       deployment_github_ref: ${{ steps.deployment_data.outputs.deployment_github_ref }}
