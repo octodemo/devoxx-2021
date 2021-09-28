@@ -7,7 +7,6 @@ jobs:
   deploy:
     name: Deploy to Environment
     runs-on: ubuntu-latest
-    if: context.payload.deploymentenvironment === 'production'
 
     steps:
       - name: Extract Deployment Details and Report Deployment in Progress
