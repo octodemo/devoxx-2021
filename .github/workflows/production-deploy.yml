@@ -118,7 +118,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ needs.prepareToDeploy.outputs.webapp_name }}
-          images: ${{ needs.prepareToDeploy.outputs.container_image }}
+          images: gcr.io/${{ needs.prepareToDeploy.outputs.container_image }}
 
       - name: Load Deployment
         timeout-minutes: 2
