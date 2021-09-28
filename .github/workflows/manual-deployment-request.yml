@@ -1,4 +1,4 @@
-name: Manu Deploy Request
+name: Manual Deploy Request
 
 on: 
   workflow_dispatch:
